@@ -4,7 +4,8 @@ const ACCEPTED_ORIGINS = [
   'http://localhost:8080',
   'http://localhost:3001',
   'http://localhost:1234',
-  'http://localhost:5173'
+  'http://localhost:5173',
+  'https://notes-app-uirb.onrender.com'
 ]
 
 export const corsMiddleware = ({ acceptedOrigins = ACCEPTED_ORIGINS } = {}) => cors({
