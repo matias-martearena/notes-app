@@ -5,12 +5,9 @@ GET http://localhost:3001
 GET http://localhost:3001/api/notes
 
 ### Get a note for id
-GET http://localhost:3001/api/notes/1
+GET http://localhost:3001/api/notes/664cd1926c7b797860521497
 
-### Delete a note for id
-DELETE http://localhost:3001/api/notes/2
-
-### Crear un nueva nota
+### Create a note
 POST http://localhost:3001/api/notes
 Content-Type: application/json
 
@@ -19,11 +16,70 @@ Content-Type: application/json
   "important": true
 }
 
-### Prueba de error al crar una nueva nota con content type difernete a json
+### Delete a note for id
+DELETE http://localhost:3001/api/notes/6650be14acd6fff227bbf0ea
+
+### Update a note for id
+PUT http://localhost:3001/api/notes/6650b290bf566e0e3700435a
+Content-Type: application/json
+
+{
+  "important": true
+}
+
+### Error tests: ----------------------------------------------
+
+### Get a note for id test error (id correct format but not exists)
+GET http://localhost:3001/api/notes/664cd1926c7b797860521491
+
+### Get a note for id test error (error type on id input)
+GET http://localhost:3001/api/notes/664cd1926c7b79786052149asdfe
+
+### Create a note but with a different content type
 POST http://localhost:3001/api/notes
 Content-Type: text/plain
 
 {
   "content": "Postman is good in testing backend",
   "important": true
+}
+
+### Create a note with a incorrect input data
+POST http://localhost:3001/api/notes
+Content-Type: application/json
+
+{
+  "content": "Err",
+  "important": true
+}
+
+### Create a note with a different schema
+POST http://localhost:3001/api/notes
+Content-Type: application/json
+
+{
+  "content": 123123,
+  "important": 12
+}
+
+### Delete a note for id already exists
+DELETE http://localhost:3001/api/notes/6650aeb4002b9c0467949625
+
+### Delete a non exists note
+DELETE http://localhost:3001/api/notes/6650aeb4002b9c04679
+
+### Update a note for id not found
+PUT http://localhost:3001/api/notes/6650b290bf566e0e3700435b
+Content-Type: application/json
+
+{
+  "important": true
+}
+
+### Update a note with a not validate content
+PUT http://localhost:3001/api/notes/6650b290bf566e0e3700435b
+Content-Type: application/json
+
+{
+  "content": "lol"
 }

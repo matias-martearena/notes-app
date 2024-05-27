@@ -1,61 +1,84 @@
+import dotenv from 'dotenv'
 import express from 'express'
-import fs from 'node:fs'
 import { corsMiddleware } from './middlewares/cors.js'
+import { errorHandler } from './middlewares/errorHandler.js'
+import Note from './models/note.js'
+
+dotenv.config()
 
 const app = express()
 
+app.use(express.static('dist'))
 app.use(express.json())
 app.use(corsMiddleware())
-app.use(express.static('dist'))
-
-let notes = JSON.parse(fs.readFileSync('./database/notes.json', 'utf-8'))
 
 app.get('/', (req, res) => {
   res.send('<h1>Hello World!</h1>')
 })
 
 app.get('/api/notes', (req, res) => {
-  res.json(notes)
+  Note.find().then(notes => {
+    res.json(notes)
+  })
 })
 
-app.get('/api/notes/:id', (req, res) => {
-  const id = Number(req.params.id)
-  const note = notes.find(note => note.id === id)
-  note ? res.json(note) : res.status(404).end()
+app.get('/api/notes/:id', (req, res, next) => {
+  Note
+    .findById(req.params.id)
+    .then(note => {
+      note ? res.json(note) : res.status(404).end()
+    })
+    .catch(error => next(error))
 })
 
-app.delete('/api/notes/:id', (req, res) => {
-  const id = Number(req.params.id)
-  notes = notes.filter(note => note.id !== id)
-
-  res.status(204).end()
-})
-
-const generateId = () => {
-  const maxId = notes.length > 0
-    ? Math.max(...notes.map(n => n.id))
-    : 0
-  return maxId + 1
-}
-
-app.post('/api/notes', (req, res) => {
+app.post('/api/notes', (req, res, next) => {
   const { body } = req
 
-  if (!body.content) {
-    return res.status(400).json({
-      error: 'content missing'
-    })
+  if (body.content === undefined) {
+    res.status(400).json({ error: 'content missing' })
   }
 
-  const note = {
+  if (typeof (body.content) !== 'string' || typeof (body.important) !== 'boolean') {
+    res.status(400).json({ error: 'content type are not valid' })
+  }
+
+  const note = new Note({
     content: body.content,
-    important: Boolean(body.important) || false,
-    id: generateId()
-  }
+    important: body.important || false
+  })
 
-  notes = notes.concat(note)
+  note
+    .save()
+    .then(savedNote => {
+      res.json(savedNote)
+    })
+    .catch(error => next(error))
+})
 
-  res.json(note)
+app.delete('/api/notes/:id', (req, res, next) => {
+  Note
+    .findByIdAndDelete(req.params.id)
+    .then(result => {
+      if (result === null) res.status(404).send({ error: 'Note not exists' })
+      res.status(204).end()
+    })
+    .catch(error => next(error))
+})
+
+// Validacion de datos:
+app.put('/api/notes/:id', (req, res, next) => {
+  const { content, important } = req.body
+
+  Note
+    .findByIdAndUpdate(
+      req.params.id,
+      { content, important },
+      { new: true, runValidators: true, context: 'query' })
+    .then(updatedNote => {
+      if (updatedNote === null) res.status(400).send({ error: 'Note not found' })
+      res.json(updatedNote)
+    })
+    .catch(error => next(error))
 })
 
 const unknowEndpoint = (req, res, next) => {
@@ -63,6 +86,7 @@ const unknowEndpoint = (req, res, next) => {
 }
 
 app.use(unknowEndpoint)
+app.use(errorHandler)
 
 const PORT = process.env.PORT ?? 3001
 app.listen(PORT, () => {

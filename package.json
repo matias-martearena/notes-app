@@ -1,5 +1,5 @@
 {
-  "name": "part3-a-backend",
+  "name": "part3-d",
   "version": "1.0.0",
   "description": "",
   "main": "app.js",
@@ -7,18 +7,19 @@
   "scripts": {
     "start": "node app.js",
     "dev": "node --watch app.js",
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "build:ui": "rm -rf dist && cd ../../4. Back-end/2. Node.js + Express/FullStackOpen/part3/notes-app-frontend && npm run build && cp -r dist ../../../../../Deploy/notes-app",
-    "deploy:full": "npm run build:ui && git add . && git commit -m uibuild && git push -u origin main && npm start"
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Matias Martearena",
   "license": "ISC",
   "dependencies": {
-    "cors": "^2.8.5",
-    "express": "4.19.2"
+    "cors": "2.8.5",
+    "dotenv": "16.4.5",
+    "express": "4.19.2",
+    "mongodb": "6.6.2",
+    "mongoose": "8.4.0"
   },
   "devDependencies": {
-    "standard": "^17.1.0"
+    "standard": "17.1.0"
   },
   "eslintConfig": {
     "extends": "standard"
